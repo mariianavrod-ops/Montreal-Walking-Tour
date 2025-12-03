@@ -16,7 +16,7 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #020617;
       color: #e5e7eb;
     }
@@ -25,11 +25,11 @@
       height: 100vh;
     }
     .sidebar {
-      width: 35%;
-      min-width: 280px;
-      max-width: 420px;
+      width: 40%;
+      min-width: 320px;
+      max-width: 460px;
       padding: 16px;
-      background: #111827;
+      background: #050816;
       border-right: 1px solid #1f2937;
       overflow-y: auto;
     }
@@ -53,57 +53,94 @@
     }
 
     .location-card {
-      background: #1f2937;
-      border-radius: 16px;
-      padding: 10px 12px 12px;
-      margin-bottom: 12px;
-      border: 1px solid #374151;
+      background: radial-gradient(circle at top left, #1d2538, #020617);
+      border-radius: 20px;
+      padding: 12px 14px 16px;
+      margin-bottom: 14px;
+      border: 1px solid #1f2937;
       cursor: pointer;
-      transition: background 0.15s, transform 0.15s;
+      transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.4);
     }
     .location-card:hover {
-      background: #0f172a;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.55);
+      border-color: #4b5563;
     }
 
     .location-header {
       display: flex;
       align-items: center;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
     .badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 22px;
-      height: 22px;
+      width: 26px;
+      height: 26px;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       font-weight: 700;
       background: #f97316;
       color: white;
       margin-right: 8px;
+      flex-shrink: 0;
     }
     .location-title {
       font-weight: 600;
-      font-size: 0.98rem;
+      font-size: 1rem;
     }
     .location-meta {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #9ca3af;
       margin-bottom: 6px;
     }
     .location-image {
       width: 100%;
-      border-radius: 12px;
-      margin-bottom: 6px;
-      max-height: 190px;
+      border-radius: 16px;
+      margin-bottom: 8px;
+      max-height: 220px;
       object-fit: cover;
       border: 1px solid #374151;
     }
     .location-desc {
-      font-size: 0.86rem;
-      line-height: 1.4;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 8px;
+      color: #e5e7eb;
+    }
+
+    .tag-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    .theme-box {
+      background: linear-gradient(135deg, #7c2d12, #b45309);
+      border-radius: 14px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: #fef9c3;
+    }
+    .field-box {
+      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+      border-radius: 14px;
+      padding: 8px 10px;
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: #e0f2fe;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -112,7 +149,10 @@
   <div class="layout">
     <aside class="sidebar">
       <h1>Montreal Walking Tour</h1>
-      <h2>Women's histories, shelters & urban memory</h2>
+      <h2>Place des Montréalaises, shelters & contested downtown spaces</h2>
+      <p class="hint">
+        Click a card or a marker to centre the map. The boxes highlight a key theme and your field notes for each site.
+      </p>
       <div id="location-list"></div>
     </aside>
 
@@ -128,54 +168,76 @@
   ></script>
 
   <script>
+    /* ---- 1. Locations with description + theme + field notes ---- */
     const locations = [
-  {
-    id: 1,
-    name: "Place des Montréalaises",
-    coords: [45.51291233912891, -73.53194153492338],
-    address: "Near Champ-de-Mars metro",
-    image: "place-des-montrealaises.jpg",
-    description:
-      "A public square honouring women who shaped Montreal’s history. It reconnects Old Montreal with the downtown core."
-  },
-  {
-    id: 2,
-    name: "Grey Nuns Motherhouse",
-    coords: [45.49533879399124, -73.57015843487274],
-    address: "1190 Rue Guy",
-    image: "grey-nuns.jpg",
-    description:
-      "Former convent and heritage site, symbolizing the role of religious women in social care, education, and health."
-  },
-  {
-    id: 3,
-    name: "Chez Doris",
-    coords: [45.494730476445284, -73.59458908240381],
-    address: "1430 Rue Chomedey",
-    image: "chez-doris.jpg",
-    description:
-      "A women’s day shelter providing meals, support, and safety for women in situations of homelessness or vulnerability."
-  },
-  {
-    id: 4,
-    name: "Square Dorchester",
-    coords: [45.503628717394356, -73.55788369114875],
-    address: "Downtown Montreal",
-    image: "square-dorchester.jpg",
-    description:
-      "A historic downtown park surrounded by major buildings and monuments. A key site for understanding public memory."
-  },
-  {
-    id: 5,
-    name: "Parc des Faubourgs",
-    coords: [45.52801980243481, -73.55319782666079],
-    address: "Near Papineau Station",
-    image: "parc-des-faubourgs.jpg",
-    description:
-      "A park associated with protest movements, encampments, and social struggles in the Centre-Sud neighbourhood."
-  }
-];
+      {
+        id: 1,
+        name: "Place des Montréalaises",
+        coords: [45.51291233912891, -73.53194153492338],
+        address: "Near Champ-de-Mars metro",
+        image: "place-des-montrealaises.jpg",
+        description:
+          "A new public square built above the Ville-Marie expressway that reconnects Old Montreal to the downtown core. It honours twenty-one women who shaped the city, making visible the gendered gaps in Montreal’s monuments and toponymy.",
+        theme:
+          "The square shows how naming practices can repair erasures: women’s lives, which used to be absent from official stone and street signs, are brought into the centre of the city’s visual story.",
+        fieldNotes:
+          "Standing here you see traffic disappearing under your feet and the walls of the old city in front of you. The plaques with women’s names are low to the ground, inviting people to walk over and read them, but also easy to overlook if you’re rushing to the metro."
+      },
+      {
+        id: 2,
+        name: "Grey Nuns Motherhouse",
+        coords: [45.49533879399124, -73.57015843487274],
+        address: "1190 Rue Guy",
+        image: "grey-nuns.jpg",
+        description:
+          "Once the central convent of the Grey Nuns, this massive complex functioned as a site of charity and control: women religious managed hospitals, orphanages, and schools here. Today it is a Concordia residence and a protected heritage building.",
+        theme:
+          "The Motherhouse reveals how women’s unpaid religious labour built much of Montreal’s social safety net, even while remaining under male ecclesial and state authority.",
+        fieldNotes:
+          "From the street, the building feels like a closed block—with high stone walls and a gated garden that students now cross with coffees and laptops. The statue of a nun holding a child gestures to care, but it also hints at the power dynamics inside institutions that decided who deserved help."
+      },
+      {
+        id: 3,
+        name: "Chez Doris",
+        coords: [45.494730476445284, -73.59458908240381],
+        address: "1430 Rue Chomedey",
+        image: "chez-doris.jpg",
+        description:
+          "Chez Doris is a day shelter and resource centre that offers meals, rest, social work, and practical support to women in precarious situations, including homelessness, violence, and poverty.",
+        theme:
+          "Placed only a few blocks from former religious institutions, Chez Doris shows how the work of care has shifted from convents to community organizations, while structural inequalities that produce gendered precarity remain.",
+        fieldNotes:
+          "The building is modest compared to the towers and churches around it. Notices on the door about opening hours, COVID rules, and available services make clear that this is a survival-oriented space, shaped by funding limits and safety needs rather than by monumental architecture."
+      },
+      {
+        id: 4,
+        name: "Square Dorchester",
+        coords: [45.503628717394356, -73.55788369114875],
+        address: "Downtown Montreal",
+        image: "square-dorchester.jpg",
+        description:
+          "A central downtown park bordered by office towers, hotels, and churches. Statues of male political and religious leaders dominate the space, reflecting whose stories are officially commemorated.",
+        theme:
+          "Square Dorchester highlights the imbalance between monumental male figures in stone and the almost invisible histories of women, service workers, and unhoused people who also occupy this space.",
+        fieldNotes:
+          "During the day, the square is full of office workers on lunch break, tourists, and people resting on benches or sleeping on the grass. The traffic and high-rises make the statues feel both important and strangely ignored; most people pass by without reading the plaques."
+      },
+      {
+        id: 5,
+        name: "Parc des Faubourgs",
+        coords: [45.52801980243481, -73.55319782666079],
+        address: "Near Papineau station, Centre-Sud",
+        image: "parc-des-faubourgs.jpg",
+        description:
+          "Located at the edge of the Jacques-Cartier Bridge, this park sits between busy roads and older working-class streets. It has hosted protests, encampments, and community events.",
+        theme:
+          "Parc des Faubourgs makes visible how housing precarity, addiction, and police surveillance shape public space. It shows the spatial consequences of policies that displace people from the city centre toward more marginal zones.",
+        fieldNotes:
+          "The sound of cars on the bridge is constant. Traces of former encampments—worn paths in the grass, leftover fencing—contrast with playground equipment and community art. The park feels both open and exposed, not fully secure for those who use it as a temporary home."
+      }
+    ];
 
+    /* ---- 2. Init map ---- */
     const map = L.map("map").setView([45.505, -73.565], 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -198,6 +260,7 @@
       map.fitBounds(boundsPoints, { padding: [40, 40] });
     }
 
+    /* ---- 3. Render cards with description + theme + field notes ---- */
     const listEl = document.getElementById("location-list");
 
     locations.forEach((loc) => {
@@ -212,6 +275,14 @@
         <div class="location-meta">${loc.address}</div>
         <img class="location-image" src="${loc.image}" alt="${loc.name}">
         <p class="location-desc">${loc.description}</p>
+        <div class="theme-box">
+          <span class="tag-label">Key Theme</span>
+          ${loc.theme}
+        </div>
+        <div class="field-box">
+          <span class="tag-label">Field Notes</span>
+          ${loc.fieldNotes}
+        </div>
       `;
 
       card.addEventListener("click", () => {
