@@ -269,7 +269,14 @@
         marker.openPopup();
       });
 
-      listEl.appendChild(card);
+        listEl.appendChild(card);
+    });
+
+    // ---- 4. Remove any stray “[object Object]” text nodes, just in case ----
+    document.querySelectorAll(".location-card *").forEach((el) => {
+      if (el.textContent.trim() === "[object Object]") {
+        el.remove();
+      }
     });
   </script>
 </body>
