@@ -9,7 +9,6 @@
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""
   />
 
@@ -17,7 +16,7 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, sans-serif;
       background: #020617;
       color: #e5e7eb;
     }
@@ -56,17 +55,17 @@
     .location-card {
       background: #1f2937;
       border-radius: 16px;
-      padding: 10px 12px;
-      margin-bottom: 10px;
+      padding: 10px 12px 12px;
+      margin-bottom: 12px;
       border: 1px solid #374151;
       cursor: pointer;
-      transition: background 0.15s, transform 0.15s, border-color 0.15s;
+      transition: background 0.15s, transform 0.15s;
     }
     .location-card:hover {
       background: #0f172a;
       transform: translateY(-1px);
-      border-color: #4b5563;
     }
+
     .location-header {
       display: flex;
       align-items: center;
@@ -84,7 +83,6 @@
       background: #f97316;
       color: white;
       margin-right: 8px;
-      flex-shrink: 0;
     }
     .location-title {
       font-weight: 600;
@@ -93,18 +91,19 @@
     .location-meta {
       font-size: 0.8rem;
       color: #9ca3af;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+    }
+    .location-image {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      max-height: 190px;
+      object-fit: cover;
+      border: 1px solid #374151;
     }
     .location-desc {
       font-size: 0.86rem;
-      line-height: 1.35;
-      color: #e5e7eb;
-    }
-
-    .hint {
-      font-size: 0.78rem;
-      color: #9ca3af;
-      margin-bottom: 10px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -113,10 +112,7 @@
   <div class="layout">
     <aside class="sidebar">
       <h1>Montreal Walking Tour</h1>
-      <h2>Place des Montréalaises, Grey Nuns, Chez Doris, Square Dorchester & Parc des Faubourgs</h2>
-      <p class="hint">
-        Click a card or a marker to see details. Click multiple points to trace your own route.
-      </p>
+      <h2>Women's histories, shelters & urban memory</h2>
       <div id="location-list"></div>
     </aside>
 
@@ -128,75 +124,71 @@
   <!-- Leaflet JS -->
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
 
   <script>
-    // ---- 1. Your locations ----
-    // NOTE: coordinates are approximate and easy to tweak:
-    // In Google Maps, right-click a point → “What’s here?” → copy the lat, lng.
-
     const locations = [
       {
         id: 1,
         name: "Place des Montréalaises",
-        coords: [45.51248913220803, -73.54886299570519], // official toponymy coords
+        coords: [45.50964, -73.55602],
         address: "Near Champ-de-Mars metro",
+        image: "place-des-montrealaises.jpg",
         description:
-          "New square honouring Montreal women, reconnecting downtown with Old Montreal."
+          "A public square honouring women who shaped Montreal’s history. It reconnects Old Montreal with the downtown core."
       },
       {
         id: 2,
         name: "Grey Nuns Motherhouse",
-        coords: [45.49719409448369, -73.57049345281159],
+        coords: [45.49333, -73.57694],
         address: "1190 Rue Guy",
+        image: "grey-nuns.jpg",
         description:
-          "Former Grey Nuns convent (now Concordia residence); key site in the city’s religious and social history."
+          "Former convent and heritage site, symbolizing the role of religious women in social care, education, and health."
       },
       {
         id: 3,
         name: "Chez Doris",
-        coords: [45.491344767161735, -73.58302151953741], // TODO: refine using Google Maps
+        coords: [45.4945, -73.58],
         address: "1430 Rue Chomedey",
+        image: "chez-doris.jpg",
         description:
-          "Day shelter and support space for women in difficulty in Shaughnessy Village."
+          "A women’s day shelter providing meals, support, and safety for women in situations of homelessness or vulnerability."
       },
       {
         id: 4,
         name: "Square Dorchester",
-        coords: [45.50274410180007, -73.56238203139671],
-        address: "2903 Rue Peel",
+        coords: [45.49954, -73.57083],
+        address: "Downtown Montreal",
+        image: "square-dorchester.jpg",
         description:
-          "Historic downtown green space and meeting point, surrounded by major civic and commercial buildings."
+          "A historic downtown park surrounded by major buildings and monuments. A key site for understanding public memory."
       },
       {
         id: 5,
         name: "Parc des Faubourgs",
-        coords: [45.52913298963447, -73.54789735029865],
-        address: "1872 Rue Dorion",
+        coords: [45.527041, -73.557655],
+        address: "Near Papineau Station",
+        image: "parc-des-faubourgs.jpg",
         description:
-          "Park near the Jacques-Cartier Bridge, tied to Centre-Sud’s working-class and industrial history."
+          "A park associated with protest movements, encampments, and social struggles in the Centre-Sud neighbourhood."
       }
     ];
 
-    // ---- 2. Initialise the map ----
     const map = L.map("map").setView([45.505, -73.565], 13);
 
-    // OpenStreetMap tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors"
+      maxZoom: 19
     }).addTo(map);
 
-    // ---- 3. Add markers ----
     const markerById = {};
     const boundsPoints = [];
 
     locations.forEach((loc) => {
       const marker = L.marker(loc.coords)
         .addTo(map)
-        .bindPopup(`<b>${loc.id}. ${loc.name}</b><br>${loc.address}`);
+        .bindPopup(`<b>${loc.name}</b><br>${loc.address}`);
 
       markerById[loc.id] = marker;
       boundsPoints.push(loc.coords);
@@ -206,18 +198,19 @@
       map.fitBounds(boundsPoints, { padding: [40, 40] });
     }
 
-    // ---- 4. Sidebar cards ----
     const listEl = document.getElementById("location-list");
 
     locations.forEach((loc) => {
       const card = document.createElement("article");
       card.className = "location-card";
+
       card.innerHTML = `
         <div class="location-header">
           <span class="badge">${loc.id}</span>
           <div class="location-title">${loc.name}</div>
         </div>
         <div class="location-meta">${loc.address}</div>
+        <img class="location-image" src="${loc.image}" alt="${loc.name}">
         <p class="location-desc">${loc.description}</p>
       `;
 
@@ -225,41 +218,10 @@
         const marker = markerById[loc.id];
         map.setView(loc.coords, 16);
         marker.openPopup();
-        addPointToRoute(loc.coords);
       });
 
       listEl.appendChild(card);
     });
-
-    // ---- 5. Simple “route drawing” between clicked points ----
-    let routePoints = [];
-    let routeLine = null;
-
-    function addPointToRoute(latlng) {
-      routePoints.push(latlng);
-
-      if (routeLine) {
-        routeLine.setLatLngs(routePoints);
-      } else if (routePoints.length > 1) {
-        routeLine = L.polyline(routePoints, { weight: 4 }).addTo(map);
-      }
-    }
-
-    // When you click on a marker, also extend the route
-    Object.values(markerById).forEach((marker) => {
-      marker.on("click", (e) => {
-        addPointToRoute(e.latlng);
-      });
-    });
-
-    // (Optional) expose a reset function in the console: clear the route
-    window.clearRoute = function () {
-      routePoints = [];
-      if (routeLine) {
-        map.removeLayer(routeLine);
-        routeLine = null;
-      }
-    };
   </script>
 </body>
 </html>
