@@ -128,13 +128,6 @@
       font-size: 0.85rem;
       color: #fef9c3;
     }
-    .field-box {
-      background: linear-gradient(135deg, #1d4ed8, #7c3aed);
-      border-radius: 14px;
-      padding: 8px 10px;
-      margin-top: 4px;
-      font-size: 0.85rem;
-      color: #e0f2fe;
     }
 
     .hint {
@@ -151,7 +144,7 @@
       <h1>Montreal Walking Tour</h1>
       <h2>Place des Montréalaises, shelters & contested downtown spaces</h2>
       <p class="hint">
-        Click a card or a marker to centre the map. The boxes highlight a key theme and your field notes for each site.
+        Click a card or a marker to centre the map. The boxes highlight a key theme for each site.
       </p>
       <div id="location-list"></div>
     </aside>
@@ -168,7 +161,7 @@
   ></script>
 
   <script>
-    /* ---- 1. Locations with description + theme + field notes ---- */
+    /* ---- 1. Locations with description + theme  ---- */
     const locations = [
       {
         id: 1,
@@ -250,7 +243,7 @@
       map.fitBounds(boundsPoints, { padding: [40, 40] });
     }
 
-    /* ---- 3. Render cards with description + theme + field notes ---- */
+    /* ---- 3. Render cards with description + theme  ---- */
     const listEl = document.getElementById("location-list");
 
     locations.forEach((loc) => {
@@ -270,8 +263,8 @@
           ${loc.theme}
         </div>
         <div class="field-box">
-          <span class="tag-label">Field Notes</span>
-          ${loc.fieldNotes}
+          <span class="tag-label"></span>
+          ${loc}
         </div>
       `;
 
