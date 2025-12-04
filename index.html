@@ -129,31 +129,65 @@
       color: #fef9c3;
     }
 
-    .hint {
+       .hint {
       font-size: 0.78rem;
       color: #9ca3af;
       margin-bottom: 10px;
     }
-    .welcome-box {
-  background: #0f172a;          /* dark navy background */
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  border: 1px solid #1e293b;    /* subtle border */
-}
 
-.welcome-box h3 {
-  margin: 0 0 6px;
-  font-size: 1.1rem;
-  color: #f8fafc;
-}
+    .welcome-panel {
+      background: #020617;
+      border-radius: 18px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+    }
 
-.welcome-box p {
-  font-size: 0.85rem;
-  margin: 0;
-  line-height: 1.4;
-  color: #cbd5e1;
-}
+    .welcome-panel h3 {
+      margin: 0 0 10px;
+      font-size: 1.4rem;
+      color: #f9fafb;
+    }
+
+    .welcome-panel p {
+      margin: 0 0 10px;
+      font-size: 0.9rem;
+      color: #9ca3af;
+    }
+
+    .welcome-route {
+      margin-top: 10px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 2px solid #38bdf8; /* cyan outline like the example */
+      background: #020827;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+    }
+
+    .welcome-route p {
+      margin: 2px 0;
+    }
+
+    .welcome-route strong {
+      font-weight: 700;
+    }
+
+    .welcome-clear {
+      margin-top: 16px;
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      background: #111827;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .welcome-clear:hover {
+      background: #1f2937;
+    }
   </style>
 </head>
 
@@ -162,16 +196,23 @@
     <aside class="sidebar">
       <h1>Montreal Walking Tour</h1>
       <h2>Place des Montréalaises, shelters & contested downtown spaces</h2>
-      <p class="hint">
-        Click a card or a marker to centre the map. The boxes highlight a key theme for each site.
-      </p>
-      <div class="welcome-box">
+     <p class="hint">
+  Click a card or a marker to centre the map. The boxes highlight a key theme for each site.
+</p>
+<div class="welcome-panel">
   <h3>Welcome to Your Walking Tour</h3>
   <p>
-    Click on any marker to get started. Then click another site to view the walking route between them.
+    Click on any location marker to get started. Then click another marker to see the walking route.
   </p>
+  <div class="welcome-route">
+    <p><strong>Route:</strong> Select a starting site → then choose another site.</p>
+    <p><strong>Distance:</strong> — | <strong>Walking time:</strong> —</p>
+  </div>
+
+  <button class="welcome-clear">Clear Route</button>
 </div>
-      <div id="location-list"></div>
+
+<div id="location-list"></div>
     </aside>
 
     <div class="map">
