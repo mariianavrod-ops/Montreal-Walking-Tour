@@ -128,7 +128,28 @@
       font-size: 0.85rem;
       color: #fef9c3;
     }
+    /* --- Read More Arrow --- */
+.read-more-toggle {
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #9ca3af;
+  margin-top: 6px;
+  transition: transform 0.3s ease;
+}
 
+.read-more-toggle.open {
+  transform: rotate(180deg);
+}
+
+.read-more-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.read-more-content.open {
+  max-height: 500px; /* enough room for your text */
+}
        .hint {
       font-size: 0.78rem;
       color: #9ca3af;
@@ -341,7 +362,12 @@ locations.forEach((loc) => {
     </div>
     <div class="location-meta">${loc.address}</div>
     <img class="location-image" src="${loc.image}" alt="${loc.name}">
-    <p class="location-desc">${loc.description}</p>
+    <div class="location-desc">
+  <div class="read-more-content">
+    ${loc.description}
+  </div>
+  <div class="read-more-toggle">▼</div>
+</div>
     <div class="theme-box">
       <span class="tag-label">Key Theme</span>
       ${loc.theme}
@@ -357,6 +383,13 @@ locations.forEach((loc) => {
   });
 
   listEl.appendChild(card);
+  // Add read-more toggle behavior
+const toggle = card.querySelector(".read-more-toggle");
+const content = card.querySelector(".read-more-content");
+
+toggle.addEventListener("click", () => {
+  toggle.classList.toggle("open");
+  content.classList.toggle("open");
 });
 
 clearBtn.addEventListener("click", clearRoute);
