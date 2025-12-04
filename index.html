@@ -332,144 +332,147 @@
           "Parc des Faubourgs makes visible how housing precarity, addiction, and police surveillance shape public space, often putting already vulnerable people—especially women experiencing homelessness—in even more danger while their stories remain absent from official commemoration."
       }
     ];
-    /* ---- 2. Init map ---- */
-const map = L.map("map").setView([45.505, -73.565], 13);
+      /* ---- 2. Init map ---- */
+  const map = L.map("map").setView([45.505, -73.565], 13);
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19
-}).addTo(map);
-
-const markerById = {};
-const boundsPoints = [];
-
-// For route logic
-let startLoc = null;
-let endLoc = null;
-let routeLine = null;
-
-// Elements in the welcome panel
-const routeLineEl = document.getElementById("route-line");
-const routeInfoEl = document.getElementById("route-info");
-const clearBtn = document.querySelector(".welcome-clear");
-
-// Create markers and add click logic
-locations.forEach((loc) => {
-  const card = document.createElement("article");
-  card.className = "location-card";
-
-  card.innerHTML = `
-    ... your HTML for the card, including
-    <div class="read-more-content"> ... </div>
-<div class="read-more-toggle">▼</div>
-  `;
-
-  card.addEventListener("click", () => {
-    const marker = markerById[loc.id];
-    map.setView(loc.coords, 16);
-    marker.openPopup();
-  });
-
-  listEl.appendChild(card);
-
-  // 🔽 THIS stays inside the forEach
-  const toggle = card.querySelector(".read-more-toggle");
-  const content = card.querySelector(".read-more-content");
-
-  if (toggle && content) {
-    toggle.addEventListener("click", (event) => {
-      event.stopPropagation();            // so it doesn't trigger the card click
-      const isOpen = content.classList.toggle("open");
-      toggle.textContent = isOpen ? "▲" : "▼";
-    });
-  }
-}); // 🔚 closes locations.forEach
-
-// 🔽 THIS goes AFTER the loop, near your route code
-clearBtn.addEventListener("click", clearRoute);
-
-/* ---- 4. Route Logic ---- */
-
-function handleMarkerClick(loc) {
-  // If no starting location yet, set it
-  if (!startLoc) {
-    startLoc = loc;
-    endLoc = null;
-    if (routeLine) {
-      map.removeLayer(routeLine);
-      routeLine = null;
-    }
-    routeLineEl.innerHTML = `<strong>Route:</strong> ${loc.name} → select another site.`;
-    routeInfoEl.innerHTML = `<strong>Distance:</strong> — | <strong>Walking time:</strong> —`;
-    return;
-  }
-
-  // If we have start but no end yet, and we clicked a different place
-  if (!endLoc && loc.id !== startLoc.id) {
-    endLoc = loc;
-    updateRoute();
-    return;
-  }
-
-  // Otherwise, start a new route from this location
-  startLoc = loc;
-  endLoc = null;
-  if (routeLine) {
-    map.removeLayer(routeLine);
-    routeLine = null;
-  }
-  routeLineEl.innerHTML = `<strong>Route:</strong> ${loc.name} → select another site.`;
-  routeInfoEl.innerHTML = `<strong>Distance:</strong> — | <strong>Walking time:</strong> —`;
-}
-
-function updateRoute() {
-  if (!startLoc || !endLoc) return;
-
-  // Remove old line if present
-  if (routeLine) {
-    map.removeLayer(routeLine);
-  }
-
-  routeLine = L.polyline([startLoc.coords, endLoc.coords], {
-    color: "#38bdf8",
-    weight: 4
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19
   }).addTo(map);
 
-  map.fitBounds(routeLine.getBounds(), { padding: [60, 60] });
+  const markerById = {};
+  const boundsPoints = [];
 
-  const distanceKm = haversine(startLoc.coords, endLoc.coords);
-  const walkingSpeedKmH = 5; // ~5 km/h typical
-  const minutes = Math.round((distanceKm / walkingSpeedKmH) * 60);
+  // elements for the sidebar + route box
+  const listEl = document.getElementById("location-list");
+  const routeLineEl = document.getElementById("route-line");
+  const routeInfoEl = document.getElementById("route-info");
+  const clearBtn = document.querySelector(".welcome-clear");
 
-  routeLineEl.innerHTML = `<strong>Route:</strong> ${startLoc.name} → ${endLoc.name}`;
-  routeInfoEl.innerHTML = `<strong>Distance:</strong> ${distanceKm.toFixed(2)} km | <strong>Walking time:</strong> ${minutes} min`;
-}
+  let startLocation = null;
+  let routeLineLayer = null;
 
-function clearRoute() {
-  startLoc = null;
-  endLoc = null;
-  if (routeLine) {
-    map.removeLayer(routeLine);
-    routeLine = null;
+  /* ---- 3. Add markers + cards ---- */
+  locations.forEach((loc) => {
+    // marker
+    const marker = L.marker(loc.coords)
+      .addTo(map)
+      .bindPopup(`<b>${loc.name}</b><br>${loc.address}`);
+
+    markerById[loc.id] = marker;
+    boundsPoints.push(loc.coords);
+
+    // when you click a marker, update route box
+    marker.on("click", () => {
+      handleLocationClick(loc);
+    });
+
+    // card
+    const card = document.createElement("article");
+    card.className = "location-card";
+
+    card.innerHTML = `
+      <div class="location-header">
+        <span class="badge">${loc.id}</span>
+        <div class="location-title">${loc.name}</div>
+      </div>
+      <div class="location-meta">${loc.address}</div>
+      <img class="location-image" src="${loc.image}" alt="${loc.name}">
+      <p class="location-desc">${loc.description}</p>
+      <div class="theme-box">
+        <span class="tag-label">Key Theme</span>
+        ${loc.theme}
+      </div>
+    `;
+
+    // clicking a card does the same as clicking a marker
+    card.addEventListener("click", () => {
+      handleLocationClick(loc);
+      const marker = markerById[loc.id];
+      map.setView(loc.coords, 16);
+      marker.openPopup();
+    });
+
+    listEl.appendChild(card);
+  });
+
+  // fit map to all points
+  if (boundsPoints.length) {
+    map.fitBounds(boundsPoints, { padding: [40, 40] });
   }
-  routeLineEl.innerHTML = `<strong>Route:</strong> Select a starting site → then choose another site.`;
-  routeInfoEl.innerHTML = `<strong>Distance:</strong> — | <strong>Walking time:</strong> —`;
-}
 
-function haversine(a, b) {
-  const R = 6371; // earth radius in km
-  const toRad = (d) => (d * Math.PI) / 180;
+  /* ---- 4. Route Logic ---- */
 
-  const dLat = toRad(b[0] - a[0]);
-  const dLon = toRad(b[1] - a[1]);
-  const lat1 = toRad(a[0]);
-  const lat2 = toRad(b[0]);
+  function handleLocationClick(loc) {
+    // first click: choose starting site
+    if (!startLocation) {
+      startLocation = loc;
+      routeLineEl.innerHTML =
+        `<strong>Route:</strong> ${loc.name} → select another site.`;
+      routeInfoEl.innerHTML =
+        `<strong>Distance:</strong> — | <strong>Walking time:</strong> —`;
+      // clear any existing line
+      if (routeLineLayer) {
+        map.removeLayer(routeLineLayer);
+        routeLineLayer = null;
+      }
+      return;
+    }
 
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+    // second click: draw line + show distance/time
+    const distanceKm = haversineKm(startLocation.coords, loc.coords);
+    const walkingTimeMin = Math.round((distanceKm / 5) * 60); // 5 km/h
 
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
+    routeLineEl.innerHTML =
+      `<strong>Route:</strong> ${startLocation.name} → ${loc.name}`;
+    routeInfoEl.innerHTML =
+      `<strong>Distance:</strong> ${distanceKm.toFixed(2)} km | ` +
+      `<strong>Walking time:</strong> ${walkingTimeMin} min`;
+
+    // draw / replace line
+    if (routeLineLayer) {
+      map.removeLayer(routeLineLayer);
+    }
+    routeLineLayer = L.polyline(
+      [startLocation.coords, loc.coords],
+      { color: "#38bdf8", weight: 4 }
+    ).addTo(map);
+
+    map.fitBounds(routeLineLayer.getBounds(), { padding: [40, 40] });
+
+    // next click will start a new route
+    startLocation = null;
+  }
+
+  function haversineKm(a, b) {
+    const R = 6371; // Earth radius in km
+    const [lat1, lon1] = a;
+    const [lat2, lon2] = b;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const sLat1 = Math.sin(dLat / 2);
+    const sLat2 = Math.sin(dLon / 2);
+    const aa =
+      sLat1 * sLat1 +
+      Math.cos(lat1 * Math.PI / 180) *
+      Math.cos(lat2 * Math.PI / 180) *
+      sLat2 * sLat2;
+    const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+    return R * c;
+  }
+
+  function clearRoute() {
+    startLocation = null;
+    if (routeLineLayer) {
+      map.removeLayer(routeLineLayer);
+      routeLineLayer = null;
+    }
+    routeLineEl.innerHTML =
+      `<strong>Route:</strong> Select a starting site → then choose another site.`;
+    routeInfoEl.innerHTML =
+      `<strong>Distance:</strong> — | <strong>Walking time:</strong> —`;
+  }
+
+  clearBtn.addEventListener("click", clearRoute);
   </script>
 </body>
 </html>
