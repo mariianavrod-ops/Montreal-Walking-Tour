@@ -110,28 +110,7 @@
       margin-bottom: 8px;
       color: #e5e7eb;
     }
-.read-more-content {
-  max-height: 4.2em;          /* about 3 lines */
-  overflow: hidden;
-  transition: max-height 0.25s ease;
-}
 
-.read-more-content.open {
-  max-height: 1000px;         /* big enough to show all text */
-}
-
-.read-more-toggle {
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #9ca3af;
-  cursor: pointer;
-  user-select: none;
-  text-align: right;
-}
-
-.read-more-toggle.open {
-  transform: rotate(180deg);  /* optional little flip animation */
-}
     .tag-label {
       font-size: 0.7rem;
       text-transform: uppercase;
@@ -149,28 +128,7 @@
       font-size: 0.85rem;
       color: #fef9c3;
     }
-    /* --- Read More Arrow --- */
-.read-more-toggle {
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: #9ca3af;
-  margin-top: 6px;
-  transition: transform 0.3s ease;
-}
-
-.read-more-toggle.open {
-  transform: rotate(180deg);
-}
-
-.read-more-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease;
-}
-
-.read-more-content.open {
-  max-height: 500px; /* enough room for your text */
-}
+  
        .hint {
       font-size: 0.78rem;
       color: #9ca3af;
@@ -228,6 +186,39 @@
     }
 
     .welcome-clear:hover {
+      background: #1f2937;
+    }
+    .welcome-clear:hover {
+      background: #1f2937;
+    }
+
+    /* --- Read-more toggle (clean version) --- */
+    .read-more-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+
+    .read-more-content.open {
+      max-height: 500px;
+    }
+
+    .read-more-toggle {
+      width: 100%;
+      margin-top: 8px;
+      border: none;
+      background: #111827;
+      color: #f9fafb;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 6px 0;
+      border-radius: 999px;
+    }
+
+    .read-more-toggle:hover {
       background: #1f2937;
     }
   </style>
@@ -371,20 +362,37 @@
     card.className = "location-card";
 
     card.innerHTML = `
-      <div class="location-header">
-        <span class="badge">${loc.id}</span>
-        <div class="location-title">${loc.name}</div>
-      </div>
-      <div class="location-meta">${loc.address}</div>
-      <img class="location-image" src="${loc.image}" alt="${loc.name}">
-      <p class="location-desc">${loc.description}</p>
-      <div class="theme-box">
-        <span class="tag-label">Key Theme</span>
-        ${loc.theme}
-      </div>
-    `;
+  <div class="location-header">
+    <span class="badge">${loc.id}</span>
+    <div class="location-title">${loc.name}</div>
+  </div>
+  <div class="location-meta">${loc.address}</div>
+  <img class="location-image" src="${loc.image}" alt="${loc.name}">
+  
+  <div class="read-more-content">
+    <p class="location-desc">${loc.description}</p>
+    <div class="theme-box">
+      <span class="tag-label">Key Theme</span>
+      ${loc.theme}
+    </div>
+  </div>
+  <button class="read-more-toggle" aria-label="Toggle details">▼</button>
+`;
+        // read-more arrow behaviour
+    const toggle = card.querySelector(".read-more-toggle");
+    const content = card.querySelector(".read-more-content");
 
-    // clicking a card does the same as clicking a marker
+    // start collapsed
+    content.classList.remove("open");
+    toggle.textContent = "▼";
+
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation(); // don’t trigger the card click
+      const isOpen = content.classList.toggle("open");
+      toggle.textContent = isOpen ? "▲" : "▼";
+    });
+
+        // clicking the card recenters the map + updates route
     card.addEventListener("click", () => {
       handleLocationClick(loc);
       const marker = markerById[loc.id];
@@ -393,7 +401,7 @@
     });
 
     listEl.appendChild(card);
-  });
+  }); // closes locations.forEach
 
   // fit map to all points
   if (boundsPoints.length) {
