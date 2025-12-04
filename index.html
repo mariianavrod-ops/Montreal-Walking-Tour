@@ -110,7 +110,28 @@
       margin-bottom: 8px;
       color: #e5e7eb;
     }
+.read-more-content {
+  max-height: 4.2em;          /* about 3 lines */
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
 
+.read-more-content.open {
+  max-height: 1000px;         /* big enough to show all text */
+}
+
+.read-more-toggle {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  cursor: pointer;
+  user-select: none;
+  text-align: right;
+}
+
+.read-more-toggle.open {
+  transform: rotate(180deg);  /* optional little flip animation */
+}
     .tag-label {
       font-size: 0.7rem;
       text-transform: uppercase;
@@ -333,65 +354,37 @@ const clearBtn = document.querySelector(".welcome-clear");
 
 // Create markers and add click logic
 locations.forEach((loc) => {
-  const marker = L.marker(loc.coords)
-    .addTo(map)
-    .bindPopup(`<b>${loc.name}</b><br>${loc.address}`);
-
-  markerById[loc.id] = marker;
-  boundsPoints.push(loc.coords);
-
-  // marker click also drives the route logic
-  marker.on("click", () => handleMarkerClick(loc));
-});
-
-if (boundsPoints.length) {
-  map.fitBounds(boundsPoints, { padding: [40, 40] });
-}
-
-/* ---- 3. Render cards ---- */
-const listEl = document.getElementById("location-list");
-
-locations.forEach((loc) => {
   const card = document.createElement("article");
   card.className = "location-card";
 
   card.innerHTML = `
-    <div class="location-header">
-      <span class="badge">${loc.id}</span>
-      <div class="location-title">${loc.name}</div>
-    </div>
-    <div class="location-meta">${loc.address}</div>
-    <img class="location-image" src="${loc.image}" alt="${loc.name}">
-    <div class="location-desc">
-  <div class="read-more-content">
-    ${loc.description}
-  </div>
-  <div class="read-more-toggle">▼</div>
-</div>
-    <div class="theme-box">
-      <span class="tag-label">Key Theme</span>
-      ${loc.theme}
-    </div>
+    ... your HTML for the card, including
+    <div class="read-more-content"> ... </div>
+<div class="read-more-toggle">▼</div>
   `;
 
-  // clicking a card also sets/updates the route
   card.addEventListener("click", () => {
     const marker = markerById[loc.id];
     map.setView(loc.coords, 16);
     marker.openPopup();
-    handleMarkerClick(loc);
   });
 
   listEl.appendChild(card);
-  // Add read-more toggle behavior
-const toggle = card.querySelector(".read-more-toggle");
-const content = card.querySelector(".read-more-content");
 
-toggle.addEventListener("click", () => {
-  toggle.classList.toggle("open");
-  content.classList.toggle("open");
-});
+  // 🔽 THIS stays inside the forEach
+  const toggle = card.querySelector(".read-more-toggle");
+  const content = card.querySelector(".read-more-content");
 
+  if (toggle && content) {
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();            // so it doesn't trigger the card click
+      const isOpen = content.classList.toggle("open");
+      toggle.textContent = isOpen ? "▲" : "▼";
+    });
+  }
+}); // 🔚 closes locations.forEach
+
+// 🔽 THIS goes AFTER the loop, near your route code
 clearBtn.addEventListener("click", clearRoute);
 
 /* ---- 4. Route Logic ---- */
